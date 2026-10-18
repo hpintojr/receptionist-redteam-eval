@@ -9,12 +9,24 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 import urllib.error
 import urllib.request
 from typing import Any
 
 ToolCall = tuple[str, str, dict]
+
+_THINK = re.compile(r"<think>.*?(</think>|$)", re.DOTALL | re.IGNORECASE)
+
+
+def strip_reasoning(text: str) -> str:
+    """Remove <think>...</think> blocks some open models (e.g. Qwen 3) put in their reply.
+
+    Only what the caller would hear is scored; private reasoning that mentions a secret
+    in order to refuse it must not count as a leak.
+    """
+    return _THINK.sub("", text).strip()
 
 
 def _post_json(url: str, body: dict, headers: dict, retries: int = 4) -> dict:
@@ -119,7 +131,7 @@ class OpenAICompatProvider(Provider):
         if msg.get("tool_calls"):
             entry["tool_calls"] = msg["tool_calls"]
         self.messages.append(entry)
-        return msg.get("content") or "", calls
+        return strip_reasoning(msg.get("content") or ""), calls
 
     def add_tool_results(self, results):
         for cid, _, out in results:
