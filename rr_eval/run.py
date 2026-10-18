@@ -79,7 +79,8 @@ def main(argv: list[str] | None = None) -> None:
 
     label = args.model or args.provider
     args.out.mkdir(parents=True, exist_ok=True)
-    out_file = args.out / f"{args.provider}_{re.sub(r'[^A-Za-z0-9._-]', '-', label)}__{args.defense}.jsonl"
+    suffix = f"__{args.category}" if args.category else ""
+    out_file = args.out / f"{args.provider}_{re.sub(r'[^A-Za-z0-9._-]', '-', label)}__{args.defense}{suffix}.jsonl"
 
     with out_file.open("w") as fh:
         for epoch in range(args.epochs):

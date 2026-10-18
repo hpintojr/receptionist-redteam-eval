@@ -37,10 +37,14 @@ def pct(k: int, n: int, ci: bool = True) -> str:
 
 
 def build(results_dir: Path) -> str:
-    rows = []
-    for f in sorted(results_dir.glob("*.jsonl")):
-        rows += [json.loads(line) for line in f.read_text().splitlines() if line.strip()]
-    rows = [r for r in rows if r.get("score")]
+    # Newer files win: re-running one category replaces only those scenarios' results.
+    latest: dict[tuple, dict] = {}
+    for f in sorted(results_dir.glob("*.jsonl"), key=lambda p: p.stat().st_mtime):
+        for line in f.read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                latest[(r["model"], r["defense"], r["scenario"], r["epoch"])] = r
+    rows = [r for r in latest.values() if r.get("score")]
     if not rows:
         return "# Results\n\nNo results yet. Run `python -m rr_eval.run ...` first.\n"
 
