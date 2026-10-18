@@ -1,0 +1,12 @@
+[project]
+name = "receptionist-redteam-eval"
+version = "0.1.0"
+description = "Red-teaming eval for tool-using AI phone receptionists: social engineering, prompt injection, and unauthorized actions."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Hamilton Pinto Jr." }]
+dependencies = []
+
+[tool.setuptools]
+packages = ["rr_eval"]
